@@ -28,7 +28,7 @@ class RunViewSet(viewsets.ModelViewSet):
 
 
 class RunStartAPIView(APIView):
-    def patch(self, request, run_id):
+    def post(self, request, run_id):
         run = get_object_or_404(Run, pk=run_id)
 
         if run.status != 'init':
