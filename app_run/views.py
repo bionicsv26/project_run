@@ -2,13 +2,16 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 
-from rest_framework.decorators import api_view
-from rest_framework.filters import SearchFilter
-from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework import viewsets
+from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from app_run.filters import RunFilter
 from app_run.models import Run
 from app_run.serializers import RunSerializer, UserSerializer
 
@@ -21,10 +24,25 @@ def company_details(request):
             'contacts': settings.CONTACTS,
         })
 
+class ConditionalPagination(PageNumberPagination):
+    page_size = 10  # Значение по умолчанию
+    page_size_query_param = 'size'
+    page_query_param = 'page'
+
+    def paginate_queryset(self, queryset, request, view=None):
+        # Включаем пагинацию только если указан параметр size
+        if 'size' in request.query_params:
+            return super().paginate_queryset(queryset, request, view)
+        return None
+
 
 class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.select_related('athlete')
     serializer_class = RunSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['created_at']
+    pagination_class = ConditionalPagination
+    filterset_class = RunFilter
 
 
 class RunStartAPIView(APIView):
@@ -68,8 +86,10 @@ class RunStopAPIView(APIView):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.filter(is_superuser=False)
     serializer_class = UserSerializer
-    filter_backends = [SearchFilter]
+    filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['first_name', 'last_name']
+    ordering_fields = ['date_joined']
+    pagination_class = ConditionalPagination
 
     def get_queryset(self):
         qs = super().get_queryset()
