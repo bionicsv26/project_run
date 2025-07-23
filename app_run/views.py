@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -93,6 +94,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        qs = qs.annotate(
+            finished_runs_count=Count(
+                'run',
+                filter=Q(run__status='finished')
+            )
+        )
+
         type_user = self.request.query_params.get('type', '').strip().lower()
         match type_user:
             case 'coach':
