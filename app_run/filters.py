@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 
 import django_filters
 
-from app_run.models import Run
+from app_run.models import Run, Challenge
 
 User = get_user_model()
 
@@ -20,3 +20,11 @@ class RunFilter(django_filters.FilterSet):
     class Meta:
         model = Run
         fields = ['athlete', 'status']
+
+
+class ChallengeFilter(django_filters.FilterSet):
+    athlete = django_filters.NumberFilter(field_name='athlete__id')
+
+    class Meta:
+        model = Challenge
+        fields = ['athlete']

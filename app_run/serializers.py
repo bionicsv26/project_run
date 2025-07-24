@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
-from app_run.models import Run, AthleteInfo
+from app_run.models import Run, AthleteInfo, Challenge
 
 
 class UserNestedSerializer(serializers.ModelSerializer):
@@ -53,3 +53,9 @@ class AthleteInfoSerializer(serializers.ModelSerializer):
                     "Weight must be greater than 0 and less than 900"
                 )
         return value
+
+
+class ChallengeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ['full_name', 'athlete']

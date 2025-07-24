@@ -30,3 +30,11 @@ class AthleteInfo(models.Model):
 
     def __str__(self):
         return f"Athlete info for {self.user.username}"
+
+
+class Challenge(models.Model):
+    full_name = models.CharField(max_length=250)
+    athlete = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ['full_name', 'athlete']

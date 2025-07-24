@@ -12,9 +12,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_run.filters import RunFilter
-from app_run.models import Run, AthleteInfo
-from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer
+from app_run.filters import RunFilter, ChallengeFilter
+from app_run.models import Run, AthleteInfo, Challenge
+from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer
 
 
 @api_view(['GET'])
@@ -78,6 +78,19 @@ class RunStopAPIView(APIView):
         run.status = 'finished'
         run.save()
 
+        # Проверяем, не стал ли этот забег 10-м завершённым
+        finished_runs_count = Run.objects.filter(
+            athlete=run.athlete,
+            status='finished'
+        ).count()
+
+        if finished_runs_count == 10:
+            # Создаём челлендж, если ещё не существует
+            Challenge.objects.get_or_create(
+                athlete=run.athlete,
+                full_name="Сделай 10 Забегов!"
+            )
+
         return Response(
             {'status': 'Забег завершен.', 'run_id': run.id, 'current_status': run.status},
             status=status.HTTP_200_OK
@@ -128,3 +141,11 @@ class AthleteInfoAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ChallengeFilter
+    pagination_class = ConditionalPagination
