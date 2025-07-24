@@ -26,7 +26,7 @@ router = DefaultRouter()
 
 router.register('api/runs', RunViewSet)
 router.register('api/users', UserViewSet)
-router.register('api/challenge', ChallengeViewSet)
+router.register('api/challenges', ChallengeViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
