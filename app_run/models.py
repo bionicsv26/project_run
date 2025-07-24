@@ -14,3 +14,19 @@ class Run(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='init')
+
+
+class AthleteInfo(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='athlete_info'
+    )
+    goals = models.TextField(blank=True, default='')
+    weight = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'Athletes Info'
+
+    def __str__(self):
+        return f"Athlete info for {self.user.username}"

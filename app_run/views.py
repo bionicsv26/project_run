@@ -13,8 +13,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_run.filters import RunFilter
-from app_run.models import Run
-from app_run.serializers import RunSerializer, UserSerializer
+from app_run.models import Run, AthleteInfo
+from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer
 
 
 @api_view(['GET'])
@@ -110,3 +110,21 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 return qs.filter(is_staff=False)
             case _:
                 return qs
+
+
+class AthleteInfoAPIView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+        athlete_info, created = AthleteInfo.objects.get_or_create(user=user)
+        serializer = AthleteInfoSerializer(athlete_info)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+        athlete_info, created = AthleteInfo.objects.get_or_create(user=user)
+        serializer = AthleteInfoSerializer(athlete_info, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

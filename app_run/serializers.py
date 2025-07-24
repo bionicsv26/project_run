@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
-from app_run.models import Run
+from app_run.models import Run, AthleteInfo
 
 
 class UserNestedSerializer(serializers.ModelSerializer):
@@ -37,3 +37,19 @@ class UserSerializer(serializers.ModelSerializer):
             return obj.finished_runs_count
         return obj.run_set.filter(status='finished').count()
 
+
+class AthleteInfoSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+
+    class Meta:
+        model = AthleteInfo
+        fields = ['user_id', 'goals', 'weight']
+
+    @staticmethod
+    def validate_weight(value):
+        if value is not None:
+            if value <= 0 or value >= 900:
+                raise serializers.ValidationError(
+                    "Weight must be greater than 0 and less than 900"
+                )
+        return value

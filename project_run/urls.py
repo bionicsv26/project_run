@@ -19,7 +19,7 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from app_run.views import RunViewSet, RunStartAPIView, RunStopAPIView, UserViewSet
+from app_run.views import RunViewSet, RunStartAPIView, RunStopAPIView, UserViewSet, AthleteInfoAPIView
 from app_run.views import company_details
 
 router = DefaultRouter()
@@ -32,5 +32,6 @@ urlpatterns = [
     path('api/company_details/', company_details),
     path('api/runs/<int:run_id>/start/', RunStartAPIView.as_view(), name='run-start'),
     path('api/runs/<int:run_id>/stop/', RunStopAPIView.as_view(), name='run-stop'),
+    path('api/athlete_info/<int:user_id>/', AthleteInfoAPIView.as_view(), name='athlete-info'),
     path('', include(router.urls))
     ]
