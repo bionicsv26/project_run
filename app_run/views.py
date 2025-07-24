@@ -119,7 +119,7 @@ class AthleteInfoAPIView(APIView):
         serializer = AthleteInfoSerializer(athlete_info)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, user_id):
+    def put(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
         athlete_info, created = AthleteInfo.objects.get_or_create(user=user)
         serializer = AthleteInfoSerializer(athlete_info, data=request.data)
