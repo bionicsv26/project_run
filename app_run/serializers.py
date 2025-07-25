@@ -65,7 +65,7 @@ class ChallengeSerializer(serializers.ModelSerializer):
 class PositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Position
-        fields = ['run', 'latitude', 'longitude']
+        fields = ['id', 'run', 'latitude', 'longitude']
 
     @staticmethod
     def validate_run(value):
