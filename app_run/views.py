@@ -154,7 +154,7 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PositionViewSet(viewsets.ModelViewSet):
-    queryset = Position.objects.all()
+    queryset = Position.objects.all().order_by('-created_at')
     serializer_class = PositionSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['run']
@@ -172,3 +172,16 @@ class PositionViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return JsonResponse(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Возвращаем JsonResponse с данными созданной позиции
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=self.get_success_headers(serializer.data),
+            content_type='application/json'
+        )
