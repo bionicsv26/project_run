@@ -13,8 +13,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_run.filters import RunFilter, ChallengeFilter
-from app_run.models import Run, AthleteInfo, Challenge
-from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer
+from app_run.models import Run, AthleteInfo, Challenge, Position
+from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer, ChallengeSerializer, \
+    PositionSerializer
 
 
 @api_view(['GET'])
@@ -149,3 +150,24 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ChallengeFilter
     pagination_class = ConditionalPagination
+
+
+class PositionViewSet(viewsets.ModelViewSet):
+    queryset = Position.objects.all()
+    serializer_class = PositionSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['run']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        run_id = self.request.query_params.get('run')
+        if run_id:
+            queryset = queryset.filter(run_id=run_id)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

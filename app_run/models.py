@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from app_run.validators import validate_coordinate
+
 
 class Run(models.Model):
 
@@ -38,3 +40,23 @@ class Challenge(models.Model):
 
     class Meta:
         unique_together = ['full_name', 'athlete']
+
+
+class Position(models.Model):
+    run = models.ForeignKey(Run, on_delete=models.CASCADE)
+    latitude = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        validators=[validate_coordinate],
+        help_text="Широта: от -90.0000 до 90.0000"
+    )
+    longitude = models.DecimalField(
+        max_digits=6,
+        decimal_places=4,
+        validators=[validate_coordinate],
+        help_text="Долгота: от -90.0000 до 90.0000"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"({self.latitude}, {self.longitude})"

@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 
 from rest_framework import serializers
 
-from app_run.models import Run, AthleteInfo, Challenge
+from app_run.models import Run, AthleteInfo, Challenge, Position
+from app_run.validators import validate_coordinate
 
 
 class UserNestedSerializer(serializers.ModelSerializer):
@@ -59,3 +60,23 @@ class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
         fields = ['full_name', 'athlete']
+
+
+class PositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
+        fields = ['run', 'latitude', 'longitude']
+
+    @staticmethod
+    def validate_run(value):
+        if value.status != 'in_progress':
+            raise serializers.ValidationError("Run must be in 'in_progress' status")
+        return value
+
+    @staticmethod
+    def validate_latitude(value):
+        return validate_coordinate(value)
+
+    @staticmethod
+    def validate_longitude(value):
+        return validate_coordinate(value)
