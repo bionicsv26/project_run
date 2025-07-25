@@ -1,3 +1,6 @@
+import json
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
@@ -152,6 +155,12 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = ChallengeFilter
     pagination_class = ConditionalPagination
 
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
+
 
 class PositionViewSet(viewsets.ModelViewSet):
     queryset = Position.objects.all().order_by('-created_at')
@@ -171,9 +180,10 @@ class PositionViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return Response(
-            serializer.data,
+        # Конвертируем данные в JSON с обработкой Decimal
+        data = json.dumps(serializer.data, cls=DecimalEncoder)
+        return JsonResponse(
+            json.loads(data),  # Загружаем обратно, чтобы JsonResponse мог обработать
             status=status.HTTP_201_CREATED,
-            headers=self.get_success_headers(serializer.data),
-            content_type='application/json'
+            headers=self.get_success_headers(serializer.data)
         )
